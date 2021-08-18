@@ -1,0 +1,50 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Aug 18, 2021, 3:48:46 PM
+    Author     : Admin
+*/
+
+.container {
+    margin: 2rem auto 2rem auto;
+}
+/* .controller {
+	margin: 50px auto 50px auto;
+} */
+.table td,
+.table th {
+    vertical-align: middle;
+}
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px;
+    width: 100%;
+    background-color: black;
+    color: white;
+    /* text-align: center; */
+}
+.paging {
+  margin-top: 10px;
+  text-align: center;
+}
+.paging a {
+  text-decoration: none;
+  padding: 2px;
+  background-color: white;
+  border-radius: 5px;
+}
+.active {
+  color: red !important;
+  pointer-events: none;
+}
+.message {
+  position: absolute;
+  padding-top: 100px;
+}

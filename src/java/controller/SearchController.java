@@ -21,7 +21,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author Admin
  */
-public class HomeController extends HttpServlet {
+public class SearchController extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -36,39 +36,45 @@ public class HomeController extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try {
-            String currentPage = request.getParameter("index");
-            int index = 0;
-            //check index page
-            if (currentPage == null) {
-                index = 1;
-            } else if (!currentPage.matches("\\d+")) {
-                index = 0;
-            } else {
-                index = Integer.parseInt(currentPage);
-            }
-            request.setAttribute("index", index);
-
             ProductDAO productDAO = new ProductDAO();
-            List<Product> listProduct = productDAO.listProductWithPaging(index);
-            int maxPage = productDAO.numberPageOfProductList();
-            request.setAttribute("listProduct", listProduct);
-            request.setAttribute("maxPage", maxPage);
+            String keyword = request.getParameter("keyword");
+            if (keyword != null && !keyword.isEmpty()) {
+                String currentPage = request.getParameter("index");
+                int index = 0;
+                //check index page
+                if (currentPage == null) {
+                    index = 1;
+                } else if (!currentPage.matches("\\d+")) {
+                    index = 0;
+                } else {
+                    index = Integer.parseInt(currentPage);
+                }
+                
+                request.setAttribute("index", index);
 
-            CountDAO countDAO = new CountDAO();
-            HttpSession session = request.getSession();
-            if (session.isNew()) {
-                countDAO.addVisit();
+                List<Product> listProduct = productDAO.listSearchProductWithPaging(index, keyword);
+                int maxPage = productDAO.numberPageOfSearchProduct(keyword);
+                request.setAttribute("listProduct", listProduct);
+                request.setAttribute("maxPage", maxPage);
+
+                CountDAO countDAO = new CountDAO();
+                HttpSession session = request.getSession();
+                if (session.isNew()) {
+                    countDAO.addVisit();
+                }
+                //get visit number
+                request.setAttribute("visit", countDAO.getVisit());
+
+                request.setAttribute("active", "0");
+            } else {
+                response.sendRedirect("home");
             }
-            //get visit number
-            request.setAttribute("visit", countDAO.getVisit());
-
-            request.setAttribute("active", "0");
-
-        } catch (Exception e) {
+        } catch(Exception e) {
+            e.printStackTrace();
             request.setAttribute("error", e);
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
-        request.getRequestDispatcher("home.jsp").forward(request, response);
+        request.getRequestDispatcher("search.jsp").forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

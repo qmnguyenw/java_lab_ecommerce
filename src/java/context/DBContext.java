@@ -51,8 +51,25 @@ public class DBContext {
         }
     }
     
+    public void closeConnection(Connection con, PreparedStatement ps) throws SQLException {
+        if (ps != null && !ps.isClosed()) {
+            ps.close();
+        }
+        if (con != null && !con.isClosed()) {
+            con.close();
+        }
+    }
+    
     public String getImgDir() throws NamingException {
         InitialContext init = new InitialContext();
         return "static/img/";
     }
+    
+//    public static void main(String[] args) {
+//        try {
+//            System.out.println(new DBContext().getConnection());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

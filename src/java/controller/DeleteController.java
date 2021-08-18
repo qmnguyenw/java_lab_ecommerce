@@ -5,23 +5,19 @@
  */
 package controller;
 
-import dao.CountDAO;
 import dao.ProductDAO;
-import entity.Product;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  *
  * @author Admin
  */
-public class HomeController extends HttpServlet {
+public class DeleteController extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -34,44 +30,8 @@ public class HomeController extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try {
-            String currentPage = request.getParameter("index");
-            int index = 0;
-            //check index page
-            if (currentPage == null) {
-                index = 1;
-            } else if (!currentPage.matches("\\d+")) {
-                index = 0;
-            } else {
-                index = Integer.parseInt(currentPage);
-            }
-            request.setAttribute("index", index);
-
-            ProductDAO productDAO = new ProductDAO();
-            List<Product> listProduct = productDAO.listProductWithPaging(index);
-            int maxPage = productDAO.numberPageOfProductList();
-            request.setAttribute("listProduct", listProduct);
-            request.setAttribute("maxPage", maxPage);
-
-            CountDAO countDAO = new CountDAO();
-            HttpSession session = request.getSession();
-            if (session.isNew()) {
-                countDAO.addVisit();
-            }
-            //get visit number
-            request.setAttribute("visit", countDAO.getVisit());
-
-            request.setAttribute("active", "0");
-
-        } catch (Exception e) {
-            request.setAttribute("error", e);
-            request.getRequestDispatcher("error.jsp").forward(request, response);
-        }
-        request.getRequestDispatcher("home.jsp").forward(request, response);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -83,7 +43,25 @@ public class HomeController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+//        try {
+//            String idStr = request.getParameter("id");
+//            int id = 0;
+//            //check id
+//            if (idStr != null) {
+//                try {
+//                    id = Integer.parseInt(idStr);
+//                    ProductDAO productDAO = new ProductDAO();
+//                    productDAO.deleteProduct(id);
+//                    response.sendRedirect("home");
+//                } catch (Exception e) {
+//                    request.setAttribute("error", e);
+//                    request.getRequestDispatcher("error.jsp").forward(request, response);
+//                }
+//            }
+//        } catch (Exception e) {
+//            request.setAttribute("error", e);
+//            request.getRequestDispatcher("error.jsp").forward(request, response);
+//        }
     }
 
     /**
@@ -97,7 +75,25 @@ public class HomeController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            String idStr = request.getParameter("id");
+            int id = 0;
+            //check id
+            if (idStr != null) {
+                try {
+                    id = Integer.parseInt(idStr);
+                    ProductDAO productDAO = new ProductDAO();
+                    productDAO.deleteProduct(id);
+                    response.sendRedirect("home");
+                } catch (Exception e) {
+                    request.setAttribute("error", e);
+                    request.getRequestDispatcher("error.jsp").forward(request, response);
+                }
+            }
+        } catch (Exception e) {
+            request.setAttribute("error", e);
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+        }
     }
 
     /**

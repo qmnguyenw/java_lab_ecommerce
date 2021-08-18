@@ -7,9 +7,9 @@ package controller;
 
 import dao.CountDAO;
 import dao.ProductDAO;
-import entity.Product;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -21,7 +21,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author Admin
  */
-public class HomeController extends HttpServlet {
+public class AddController extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -34,44 +34,9 @@ public class HomeController extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try {
-            String currentPage = request.getParameter("index");
-            int index = 0;
-            //check index page
-            if (currentPage == null) {
-                index = 1;
-            } else if (!currentPage.matches("\\d+")) {
-                index = 0;
-            } else {
-                index = Integer.parseInt(currentPage);
-            }
-            request.setAttribute("index", index);
 
-            ProductDAO productDAO = new ProductDAO();
-            List<Product> listProduct = productDAO.listProductWithPaging(index);
-            int maxPage = productDAO.numberPageOfProductList();
-            request.setAttribute("listProduct", listProduct);
-            request.setAttribute("maxPage", maxPage);
-
-            CountDAO countDAO = new CountDAO();
-            HttpSession session = request.getSession();
-            if (session.isNew()) {
-                countDAO.addVisit();
-            }
-            //get visit number
-            request.setAttribute("visit", countDAO.getVisit());
-
-            request.setAttribute("active", "0");
-
-        } catch (Exception e) {
-            request.setAttribute("error", e);
-            request.getRequestDispatcher("error.jsp").forward(request, response);
-        }
-        request.getRequestDispatcher("home.jsp").forward(request, response);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -83,7 +48,20 @@ public class HomeController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            CountDAO countDAO = new CountDAO();
+            HttpSession session = request.getSession();
+            if (session.isNew()) {
+                countDAO.addVisit();
+            }
+            //get visit number
+            request.setAttribute("visit", countDAO.getVisit());
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", e);
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+        }
+        request.getRequestDispatcher("add.jsp").forward(request, response);
     }
 
     /**
@@ -97,7 +75,44 @@ public class HomeController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            String name = request.getParameter("name").trim();
+            String image_url = request.getParameter("image_url").trim();
+            String price = request.getParameter("price").trim();
+
+            List<String> message = new ArrayList<>();
+
+            ProductDAO productDAO = new ProductDAO();
+
+            if (name.isEmpty()) {
+                message.add("Name field cannot be empty.");
+            } else {
+                if (!name.matches("[a-zA-Z0-9 ]{1,}")) {
+                    message.add("Name not match requirements.");
+                }
+            }
+            if (image_url.isEmpty()) {
+                message.add("Image field cannot be empty.");
+            }
+            if (price.isEmpty()) {
+                message.add("Price field cannot be empty.");
+            }
+
+            if (message.size() > 0) {
+                request.setAttribute("message", message);
+                doGet(request, response);
+            } else {
+                productDAO.addProduct(name, image_url, Double.parseDouble(price));
+                String success = "Done Add";
+                request.setAttribute("success", success);
+                response.sendRedirect("home");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", e);
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+        }
     }
 
     /**
